@@ -1,3 +1,4 @@
 frames/
 *.mp4
 pz1/images
+__pycache__
