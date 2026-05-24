@@ -84,7 +84,8 @@ class Settings(BaseSettings):  # noqa: D101
     NUDE_THRESHOLD: float = 0.997
     CAPTION_ENABLED: bool = True
     CAPTION_MODEL_PATH: str = "microsoft/Florence-2-base"
-    CAPTION_BATCH_SIZE: int = 4
+    CAPTION_BATCH_SIZE: int = 16
+    OCR_RECOGNITION_BATCH_SIZE: int = 16
 
     # ##############################
     # Настройки LLM анализа текста

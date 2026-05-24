@@ -23,6 +23,7 @@ from app.tasks._loop import get_loop
 
 _MAX_AGE_S = 60 * 60 * 9   # 9 часов
 _MAX_AGE_MS = _MAX_AGE_S * 1000
+_TIME_LIMIT_MS = 60 * 60 * 24 * 1000  # 24 часа
 _POLL_INTERVAL_S = 30
 _AUDIO_CONFIDENCE = 0.98
 
@@ -34,6 +35,7 @@ class CollectResultsTask(dramatiq.GenericActor):
         queue_name = "collect_results_queue"
         max_retries = 5
         max_age = _MAX_AGE_MS
+        time_limit = _TIME_LIMIT_MS
 
     def __init__(self) -> None:
         self.logger: Logger = logging.getLogger(__name__)
@@ -190,7 +192,7 @@ class CollectResultsTask(dramatiq.GenericActor):
                 )
                 if file_reg is None:
                     return ""
-            return s3.get_presigned_url(
+            return await s3.get_presigned_url(
                 settings.S3_VIDEO_BUCKET_NAME, file_reg.s3_key,
             )
         except Exception:

@@ -130,6 +130,13 @@ class OwlDetector:
             device=device,
         )
 
+        # Препроцессим изображения один раз — pixel_values переиспользуется во всех чанках
+        image_inputs = processor(images=pil_images, return_tensors="pt")
+        pixel_values = image_inputs["pixel_values"].to(device)
+        if "cuda" in device:
+            pixel_values = pixel_values.half()
+        del image_inputs
+
         # Аккумуляторы результатов — по одному на кадр
         acc_by_prompt: list[dict[str, float]] = [
             dict.fromkeys(flat_prompts, 0.0) for _ in frames
@@ -146,14 +153,17 @@ class OwlDetector:
         ]
 
         for chunk_prompts in prompt_chunks:
-            inputs = processor(
+            # Только токенизируем текст — изображения не трогаем
+            text_inputs = processor(
                 text=[chunk_prompts] * len(pil_images),
-                images=pil_images,
                 return_tensors="pt",
                 padding=True,
             ).to(device)
-            if "cuda" in device:
-                inputs["pixel_values"] = inputs["pixel_values"].half()
+            inputs = {
+                "pixel_values": pixel_values,
+                "input_ids": text_inputs["input_ids"],
+                "attention_mask": text_inputs["attention_mask"],
+            }
 
             outputs = model(**inputs)
             raw = processor.post_process_object_detection(
@@ -180,11 +190,11 @@ class OwlDetector:
                         "box": [round(c) for c in box],
                     })
 
-            del inputs, outputs, raw
-            if "cuda" in device:
-                torch.cuda.empty_cache()
+            del text_inputs, inputs, outputs, raw
 
-        del pil_images, target_sizes
+        del pixel_values, pil_images, target_sizes
+        if "cuda" in device:
+            torch.cuda.empty_cache()
 
         return [
             OwlResult(

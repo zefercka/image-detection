@@ -162,7 +162,7 @@ class S3Client:
 
             return True
 
-    def get_presigned_url(
+    async def get_presigned_url(
         self,
         bucket_name: str,
         file_name: str,
@@ -179,13 +179,12 @@ class S3Client:
             str: Предподписанный URL для доступа к файлу.
 
         """
-
-        client = self.session.client("s3", endpoint_url=self.endpoint_url)
-        return client.generate_presigned_url(
-            "get_object",
-            Params={"Bucket": bucket_name, "Key": file_name},
-            ExpiresIn=expires_in,
-        )
+        async with self.session.client("s3", endpoint_url=self.endpoint_url) as client:
+            return await client.generate_presigned_url(
+                "get_object",
+                Params={"Bucket": bucket_name, "Key": file_name},
+                ExpiresIn=expires_in,
+            )
 
 
 def get_s3_client() -> S3Client:

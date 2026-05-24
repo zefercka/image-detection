@@ -19,6 +19,7 @@ from app.tasks._loop import get_loop
 
 _MAX_AGE_S = 60 * 60 * 2
 _MAX_AGE_MS = _MAX_AGE_S * 1000
+_TIME_LIMIT_MS = 60 * 60 * 12 * 1000  # 12 часов
 _DETECTION_POLL_S = 30
 _CLIP_TOP_K = 3
 
@@ -30,6 +31,7 @@ class TranscribeAudioTask(dramatiq.GenericActor):
         queue_name = "transcribe_audio_queue"
         max_retries = 5
         max_age = _MAX_AGE_MS
+        time_limit = _TIME_LIMIT_MS
 
     def __init__(self) -> None:
         self.logger: Logger = logging.getLogger(__name__)
@@ -80,7 +82,7 @@ class TranscribeAudioTask(dramatiq.GenericActor):
 
             detection_classes = await DetectionClassRepository.get_all_names(db)
 
-        # Не параллельный режим: ждём детекцию ДО Whisper — GPU не конкурируют
+        # Не параллельный режим: ждём детекцию ДО Whisper
         if not settings.PARALLEL_PROCESS_VIDEO:
             clip_context = await self._wait_and_get_clip_context(
                 s3, bucket_name, pipeline_id,

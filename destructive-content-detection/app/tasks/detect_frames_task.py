@@ -45,6 +45,7 @@ class DetectFramesTask(dramatiq.GenericActor):
         queue_name = "detect_frames_queue"
         max_retries = 5
         max_age = _MAX_AGE_MS
+        time_limit = _MAX_AGE_MS
 
     def __init__(self) -> None:
         self.logger: Logger = logging.getLogger(__name__)
