@@ -1,0 +1,105 @@
+{
+    "users" : [
+        {
+            "name" : "admin",
+            "password_hash" : "HntqK97Bb7MgAEJ1YDjXYoEYBrAG5jaLJYUOnI4YRtElKpus",
+            "tags" : "administrator"
+        }
+    ],
+    "vhosts" : [
+        {
+            "name" : "/"
+        }
+    ],
+    "permissions" : [
+        {
+            "user" : "admin",
+            "vhost" : "/",
+            "configure" : ".*",
+            "write" : ".*",
+            "read" : ".*"
+        }
+    ],
+    "queues" : [
+        {
+            "name" : "video_process_queue",
+            "vhost" : "/",
+            "durable" : true,
+            "auto_delete" : false,
+            "arguments" : {
+                "x-dead-letter-exchange" : "",
+                "x-dead-letter-routing-key" : "video_process_queue.XQ"
+            }
+        },
+        {
+            "name" : "video_process_queue.DQ",
+            "vhost" : "/",
+            "durable" : true,
+            "auto_delete" : false,
+            "arguments" : {
+                "x-dead-letter-exchange" : "",
+                "x-dead-letter-routing-key" : "video_process_queue.XQ"
+            }
+        },
+        {
+            "name" : "transcribe_audio_queue",
+            "vhost" : "/",
+            "durable" : true,
+            "auto_delete" : false,
+            "arguments" : {
+                "x-dead-letter-exchange" : "",
+                "x-dead-letter-routing-key" : "transcribe_audio_queue.XQ"
+            }
+        },
+        {
+            "name" : "transcribe_audio_queue.DQ",
+            "vhost" : "/",
+            "durable" : true,
+            "auto_delete" : false,
+            "arguments" : {
+                "x-dead-letter-exchange" : "",
+                "x-dead-letter-routing-key" : "transcribe_audio_queue.XQ"
+            }
+        },
+        {
+            "name" : "detect_frames_queue",
+            "vhost" : "/",
+            "durable" : true,
+            "auto_delete" : false,
+            "arguments" : {
+                "x-dead-letter-exchange" : "",
+                "x-dead-letter-routing-key" : "detect_frames_queue.XQ"
+            }
+        },
+        {
+            "name" : "detect_frames_queue.DQ",
+            "vhost" : "/",
+            "durable" : true,
+            "auto_delete" : false,
+            "arguments" : {
+                "x-dead-letter-exchange" : "",
+                "x-dead-letter-routing-key" : "detect_frames_queue.XQ"
+            }
+        },
+        {
+            "name" : "collect_results_queue",
+            "vhost" : "/",
+            "durable" : true,
+            "auto_delete" : false,
+            "arguments" : {
+                "x-dead-letter-exchange" : "",
+                "x-dead-letter-routing-key" : "collect_results_queue.XQ"
+            }
+        },
+        {
+            "name" : "collect_results_queue.DQ",
+            "vhost" : "/",
+            "durable" : true,
+            "auto_delete" : false,
+            "arguments" : {
+                "x-dead-letter-exchange" : "",
+                "x-dead-letter-routing-key" : "collect_results_queue.XQ"
+            }
+        }
+    ]
+}

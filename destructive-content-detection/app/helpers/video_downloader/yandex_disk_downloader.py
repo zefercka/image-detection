@@ -27,17 +27,30 @@ class YandexDiskDownloader(VideoDownloader):
         return response.json()["href"]
 
     async def download_file(self, url: str, resolution: int | None = None) -> str:
+        if resolution is not None:
+            raise ValueError(
+                "YandexDiskDownloader does not support resolution selection"
+            )
+
         download_link = await self._get_download_link(url)
 
         async with AsyncClient() as client:
-            download_response = await client.get(download_link)
-            download_response.raise_for_status()
+            async with client.stream("GET", download_link) as download_response:
+                download_response.raise_for_status()
+                chunks = download_response.aiter_bytes()
+                try:
+                    first_chunk = await anext(chunks)
+                except StopAsyncIteration:
+                    first_chunk = b""
 
-        filename = self._get_file_name(download_response.content)
-        file_path = self._save_path / filename
+                filename = self._get_file_name(first_chunk)
+                file_path = self._save_path / filename
 
-        async with async_open(str(file_path), "wb") as f:
-            await f.write(download_response.content)
+                async with async_open(str(file_path), "wb") as f:
+                    if first_chunk:
+                        await f.write(first_chunk)
+                    async for chunk in chunks:
+                        await f.write(chunk)
 
         return str(file_path.absolute())
 

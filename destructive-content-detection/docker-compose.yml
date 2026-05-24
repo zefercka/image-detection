@@ -1,0 +1,63 @@
+services:
+  rabbitmq:
+    image: rabbitmq:4.2-management
+    container_name: dcd-rabbitmq
+    deploy:
+      restart_policy:
+        condition: on-failure
+        delay: 10s
+    env_file:
+      - ".rabbitmq.env"
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    volumes:
+      - ./rabbitmq/rabbitmq.conf:/etc/rabbitmq/rabbitmq.conf:ro
+      - ./rabbitmq/definitions.json:/etc/rabbitmq/definitions.json:ro
+      - rabbitmq_data:/var/lib/rabbitmq
+    networks:
+      - destructive_content_net
+
+  minio:
+    image: minio/minio:RELEASE.2025-09-07T16-13-09Z
+    container_name: dcd-minio
+    deploy:
+      restart_policy:
+        condition: on-failure
+        delay: 10s
+    env_file:
+      - ".minio.env"
+    ports:
+      - "9100:9000"
+      - "9101:9001"
+    command: server /data --console-address ":9001"
+    volumes:
+      - minio_data:/data
+    networks:
+      - destructive_content_net
+
+  postgres:
+    image: postgres:16
+    container_name: dcd-postgres-db
+    deploy:
+      restart_policy:
+        condition: on-failure
+        delay: 10s
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: dcd_db
+    ports:
+      - "5434:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    networks:
+      - destructive_content_net
+
+volumes:
+  rabbitmq_data:
+  minio_data:
+  pgdata:
+
+networks:
+  destructive_content_net:

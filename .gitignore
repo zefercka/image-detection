@@ -1,4 +1,12 @@
 frames/
 *.mp4
+*.jpg
+*.png
 pz1/images
 __pycache__
+*.env
+.venv
+runs
+.vscode
+.claude
+*datasets*
